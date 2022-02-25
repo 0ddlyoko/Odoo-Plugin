@@ -1,0 +1,42 @@
+plugins {
+    id 'org.jetbrains.intellij' version '1.4.0'
+    id 'java'
+}
+
+group 'me.oddlyoko'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.python:jython-slim:2.7.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version = '2021.3.2'
+    type = 'PC'
+    plugins = [
+            "PythonCore"
+    ]
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+patchPluginXml {
+    changeNotes = """
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>"""
+}
+
+test {
+    useJUnitPlatform()
+}

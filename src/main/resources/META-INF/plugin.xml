@@ -1,0 +1,35 @@
+<idea-plugin>
+    <id>me.oddlyoko.odoo</id>
+    <name>Odoo</name>
+    <vendor email="nathangiaco@hotmail.com" url="https://0ddlyoko.be">Giacomello Nathan</vendor>
+
+    <description><![CDATA[
+    Plugin used to fastly create odoo plugin
+    ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.python</depends>
+
+    <applicationListeners>
+        <listener class="me.oddlyoko.odoo.listeners.ProjectListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="me.oddlyoko.odoo.listeners.FileListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+    </applicationListeners>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <postStartupActivity implementation="me.oddlyoko.odoo.ProjectStartupActivity"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="Odoo.actions.StackOverflowAction" class="me.oddlyoko.odoo.actions.StackOverflowAction"
+                text="Open Stackoverflow" description="Open stackOverflow">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="Odoo.actions.StackOverflowSelectionAction" class="me.oddlyoko.odoo.actions.StackOverflowSelectionAction"
+                text="Open Stackoverflow for Selected Text" description="Open stackOverflow for selected text">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
