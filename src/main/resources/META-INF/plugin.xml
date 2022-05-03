@@ -17,6 +17,10 @@
     <extensions defaultExtensionNs="com.intellij">
     </extensions>
 
+    <extensions defaultExtensionNs="Pythonid">
+        <inspectionExtension implementation="me.oddlyoko.odoo.highlighting.OdooPyInspectionExtension" />
+    </extensions>
+
     <actions>
     </actions>
 </idea-plugin>
