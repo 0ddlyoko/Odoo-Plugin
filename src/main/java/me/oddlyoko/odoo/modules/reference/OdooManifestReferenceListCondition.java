@@ -8,14 +8,15 @@ import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyKeyValueExpression;
 import com.jetbrains.python.psi.PyListLiteralExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
+import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 
 public class OdooManifestReferenceListCondition extends PatternCondition<PyStringLiteralExpression> {
-    private final List<String> acceptedKeys;
+    private final Set<String> acceptedKeys;
 
-    public OdooManifestReferenceListCondition(List<String> acceptedKeys) {
+    public OdooManifestReferenceListCondition(Set<String> acceptedKeys) {
         super("__manifest__");
         this.acceptedKeys = acceptedKeys;
     }
@@ -24,7 +25,7 @@ public class OdooManifestReferenceListCondition extends PatternCondition<PyStrin
     public boolean accepts(@NotNull PyStringLiteralExpression pyString, ProcessingContext context) {
         PsiFile file = pyString.getContainingFile();
         // Only works in manifest file
-        if (file == null || !"__manifest__.py".equalsIgnoreCase(file.getName()))
+        if (file == null || !OdooModuleUtil.MANIFEST_FILES.contains(file.getName()))
             return false;
 
         PsiElement parent = pyString.getParent();

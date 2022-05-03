@@ -9,7 +9,7 @@ import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import me.oddlyoko.odoo.modules.models.OdooModule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 
 public class OdooModuleReference extends PsiReferenceBase.Poly<PsiElement> {
     public OdooModuleReference(PsiElement psiElement) {
@@ -37,9 +37,9 @@ public class OdooModuleReference extends PsiReferenceBase.Poly<PsiElement> {
     @Override
     public Object[] getVariants() {
         PsiElement element = getElement();
-        List<OdooModule> modules = OdooModuleUtil.getModules(element.getProject());
+        Set<OdooModule> modules = OdooModuleUtil.getModules(element.getProject());
         OdooModule currentModule = OdooModuleUtil.getModule(element);
-        var a = modules.remove(currentModule);
+        modules.remove(currentModule);
         return modules.stream().map(OdooModule::getDirectory).toArray();
     }
 }

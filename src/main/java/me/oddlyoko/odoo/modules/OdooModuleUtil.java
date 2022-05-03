@@ -14,21 +14,22 @@ import me.oddlyoko.odoo.modules.models.OdooModule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 
 public final class OdooModuleUtil {
-    public static final String[] MANIFEST_FILES = new String[]{
+    public static final List<String> MANIFEST_FILES = List.of(
             "__manifest__.py",
-            //"__openerp__.py",
-    };
+            "__openerp__.py"
+    );
     public static final String INIT_FILE = "__init__.py";
 
     private OdooModuleUtil() {}
 
     public static boolean isValidManifest(@NotNull VirtualFile file) {
         for (String manifestFile : MANIFEST_FILES)
-            if (!manifestFile.equals(file.getName()))
-                return false;
-        return true;
+            if (manifestFile.equals(file.getName()))
+                return true;
+        return false;
     }
 
     public static boolean isOdooModuleDirectory(@NotNull VirtualFile dir) {
@@ -84,7 +85,7 @@ public final class OdooModuleUtil {
         return file == null ? null : file.getOriginalFile();
     }
 
-    public static List<OdooModule> getModules(@NotNull Project project) {
+    public static Set<OdooModule> getModules(@NotNull Project project) {
         return OdooModuleIndex.getAllModules(project);
     }
 

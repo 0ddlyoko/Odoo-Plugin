@@ -15,11 +15,11 @@ import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import me.oddlyoko.odoo.modules.models.OdooModule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Index containing all odoo modules
@@ -80,8 +80,8 @@ public class OdooModuleIndex extends ScalarIndexExtension<String> {
         return null;
     }
 
-    public static List<OdooModule> getAllModules(@NotNull Project project) {
-        List<OdooModule> modules = new ArrayList<>();
+    public static Set<OdooModule> getAllModules(@NotNull Project project) {
+        Set<OdooModule> modules = new HashSet<>();
         Collection<String> moduleNames = FileBasedIndex.getInstance().getAllKeys(NAME, project);
         for (String moduleName : moduleNames) {
             OdooModule module = getModule(moduleName, project);
