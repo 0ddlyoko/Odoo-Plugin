@@ -12,24 +12,11 @@
     <depends>com.intellij.modules.python</depends>
 
     <applicationListeners>
-        <listener class="me.oddlyoko.odoo.listeners.ProjectListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
-        <listener class="me.oddlyoko.odoo.listeners.FileListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-        <postStartupActivity implementation="me.oddlyoko.odoo.ProjectStartupActivity"/>
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
-        <action id="Odoo.actions.StackOverflowAction" class="me.oddlyoko.odoo.actions.StackOverflowAction"
-                text="Open Stackoverflow" description="Open stackOverflow">
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-        </action>
-        <action id="Odoo.actions.StackOverflowSelectionAction" class="me.oddlyoko.odoo.actions.StackOverflowSelectionAction"
-                text="Open Stackoverflow for Selected Text" description="Open stackOverflow for selected text">
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-        </action>
     </actions>
 </idea-plugin>
