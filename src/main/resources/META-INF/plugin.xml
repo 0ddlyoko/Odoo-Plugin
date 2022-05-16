@@ -15,6 +15,13 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor implementation="me.oddlyoko.odoo.modules.reference.OdooManifestReferenceContributor" />
+    </extensions>
+
+    <extensions defaultExtensionNs="Pythonid">
+        <importResolver implementation="me.oddlyoko.odoo.modules.OdooModuleResolver" />
+        <pyModuleMembersProvider implementation="me.oddlyoko.odoo.modules.OdooModuleAddonsMembersProvider" />
+        <inspectionExtension implementation="me.oddlyoko.odoo.highlighting.OdooPyInspectionExtension" />
     </extensions>
 
     <actions>
