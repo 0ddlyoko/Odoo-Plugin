@@ -15,6 +15,10 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
+        <fileBasedIndex implementation="me.oddlyoko.odoo.models.indexes.OdooModelIndex" />
+        <fileBasedIndex implementation="me.oddlyoko.odoo.modules.indexes.OdooModuleIndex" />
+        <fileBasedIndex implementation="me.oddlyoko.odoo.modules.indexes.OdooModuleDependencyIndex" />
+
         <psi.referenceContributor implementation="me.oddlyoko.odoo.modules.reference.OdooManifestReferenceContributor" />
     </extensions>
 
