@@ -23,7 +23,7 @@ import java.util.Objects;
  * A description of a model
  */
 public final class ModelDescriptor {
-    public static final Key<CachedValue<ModelDescriptor>> MODEL_DESCRIPTOR_KEY = new Key<>("modelDescriptor");
+    public static final Key<CachedValue<ModelDescriptor>> MODEL_DESCRIPTOR_KEY = new Key<>("model.descriptor");
 
     private final PyClass pyClass;
     private final String odooModel;

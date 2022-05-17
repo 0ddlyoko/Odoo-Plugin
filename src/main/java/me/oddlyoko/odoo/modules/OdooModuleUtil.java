@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class OdooModuleUtil {
     public static final List<String> MANIFEST_FILES = List.of(
@@ -57,7 +58,7 @@ public final class OdooModuleUtil {
      * Retrieves the odoo module directory from a given file or directory
      *
      * @param file The file or directory
-     * @return The odoo module diectory if found, <i>null</i> otherwise
+     * @return The odoo module directory if found, <i>null</i> otherwise
      */
     public static VirtualFile getOdooModuleDirectory(@NotNull VirtualFile file) {
         if (isOdooModuleDirectory(file))
@@ -87,6 +88,19 @@ public final class OdooModuleUtil {
 
     public static Set<OdooModule> getModules(@NotNull Project project) {
         return OdooModuleIndex.getAllModules(project);
+    }
+
+    /**
+     * Get available {@link OdooModule} from given {@link OdooModule}
+     *
+     * @param odooModule The {@link OdooModule}
+     * @return A {@link List} containing the given module, his depends, depends of depends, ...
+     */
+    public static List<OdooModule> getAvailableModules(@NotNull OdooModule odooModule) {
+        return odooModule.getModuleDepends()
+                .stream()
+                .map(s -> getModule(s, odooModule.getProject()))
+                .collect(Collectors.toList());
     }
 
     public static OdooModule getModule(@NotNull VirtualFile file, @NotNull Project project) {
@@ -132,5 +146,16 @@ public final class OdooModuleUtil {
                 return getModule(((PsiTarget) target).getNavigationElement());
         }
         return getModule(element.getContainingFile());
+    }
+
+    public static OdooModule getModuleFromFile(@NotNull PsiFile file) {
+        VirtualFile vFile = file.getVirtualFile();
+        if (vFile == null)
+            return null;
+        return getModule(vFile, file.getProject());
+    }
+
+    public static OdooModule getModuleFromDirectory(@NotNull PsiDirectory directory) {
+        return getModule(directory.getVirtualFile(), directory.getProject());
     }
 }
