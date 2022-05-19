@@ -2,7 +2,6 @@ package me.oddlyoko.odoo.modules.models;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValue;
@@ -58,8 +57,7 @@ public final class OdooModule {
     public ModuleDescriptor getModuleDescriptor() {
         return CachedValuesManager.getCachedValue(manifestFile, MODULE_DESCRIPTOR_KEY, () -> {
             ModuleDescriptor descriptor = ModuleDescriptor.parseFile(manifestFile);
-            // TODO Add correct ModificationTracker
-            return CachedValueProvider.Result.create(descriptor, ModificationTracker.EVER_CHANGED);
+            return CachedValueProvider.Result.create(descriptor, manifestFile);
         });
     }
 
@@ -81,8 +79,7 @@ public final class OdooModule {
                     }
                 }
             }
-            // TODO Add correct ModificationTracker
-            return CachedValueProvider.Result.create(Collections.unmodifiableSet(result), ModificationTracker.EVER_CHANGED);
+            return CachedValueProvider.Result.create(Collections.unmodifiableSet(result), manifestFile);
         });
     }
 
