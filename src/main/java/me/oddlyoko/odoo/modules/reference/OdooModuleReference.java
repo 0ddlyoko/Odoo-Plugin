@@ -37,7 +37,7 @@ public class OdooModuleReference extends PsiReferenceBase.Poly<PsiElement> {
     @Override
     public Object[] getVariants() {
         PsiElement element = getElement();
-        Set<OdooModule> modules = OdooModuleUtil.getModules(element.getProject());
+        Set<OdooModule> modules = OdooModuleUtil.getAllModules(element.getProject());
         OdooModule currentModule = OdooModuleUtil.getModule(element);
         modules.remove(currentModule);
         return modules.stream().map(OdooModule::getDirectory).toArray();

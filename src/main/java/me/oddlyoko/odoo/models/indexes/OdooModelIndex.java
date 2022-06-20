@@ -2,6 +2,7 @@ package me.oddlyoko.odoo.models.indexes;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.DataIndexer;
@@ -16,6 +17,7 @@ import com.jetbrains.python.psi.PyElementVisitor;
 import me.oddlyoko.odoo.models.OdooModelFilter;
 import me.oddlyoko.odoo.models.OdooModelUtil;
 import me.oddlyoko.odoo.models.models.ModelDescriptor;
+import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import me.oddlyoko.odoo.models.models.OdooModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
  * Index containing all odoo modules
  */
 public class OdooModelIndex extends ScalarIndexExtension<String> {
-    private static final ID<String, Void> NAME = ID.create("odoo.model");
+    public static final ID<String, Void> NAME = ID.create("odoo.model");
 
     @NotNull
     @Override
@@ -42,15 +44,21 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
     public DataIndexer<String, Void, FileContent> getIndexer() {
         return inputData -> {
             Map<String, Void> result = new HashMap<>();
-            PsiFile file = inputData.getPsiFile();
+            PsiFile file = inputData.getPsiFile().getOriginalFile();
+            PsiDirectory directory = file.getContainingDirectory();
+            if (directory == null)
+                return result;
+            PsiFile manifestFile = OdooModuleUtil.getManifestFromDirectory(directory);
+            if (manifestFile == null)
+                return result;
             file.acceptChildren(new PyElementVisitor() {
                 @Override
                 public void visitPyClass(@NotNull PyClass node) {
                     super.visitPyClass(node);
-
-                    OdooModel model = OdooModel.fromPyClass(node);
-                    if (model == null)
+                    node = (PyClass) node.getOriginalElement();
+                    if (OdooModelUtil.isInvalidOdooPyClass(node))
                         return;
+
                     ModelDescriptor descriptor = ModelDescriptor.fromPyClass(node);
                     if (descriptor == null)
                         return;
@@ -83,13 +91,6 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
         return true;
     }
 
-    public static Set<OdooModel> getModelsForModule(@NotNull String module, @NotNull Project project) {
-        return getAllModels(project)
-                .stream()
-                .filter(odooModel -> module.equals(odooModel.getOdooModel()))
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
     /**
      * Retrieves all {@link OdooModel} instance from given id for given {@link Project}
      *
@@ -104,20 +105,7 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
                 .stream()
                 .flatMap(file -> OdooModelUtil.getModels(file, project)
                         .stream()
-                        .filter(odooModel1 -> odooModel.equals(odooModel1.getOdooModel())))
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    /**
-     * Retrieves all {@link OdooModel} of given {@link Project}
-     *
-     * @param project The project
-     * @return A {@link Set} containing all models for given {@link Project}
-     */
-    public static Set<OdooModel> getAllModels(@NotNull Project project) {
-        return getAllStringModels(project)
-                .stream()
-                .flatMap(model -> getModels(model, project).stream())
+                        .filter(odooModel1 -> odooModel1 != null && odooModel.equals(odooModel1.getOdooModel())))
                 .collect(Collectors.toUnmodifiableSet());
     }
 

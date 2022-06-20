@@ -76,7 +76,7 @@ public final class OdooModuleUtil {
      * @param directory The odoo directory
      * @return The manifest file if found, <i>null</i> otherwise
      */
-    public static PsiFile getManifest(@NotNull PsiDirectory directory) {
+    public static PsiFile getManifestFromDirectory(@NotNull PsiDirectory directory) {
         PsiFile file = null;
         for (String manifest : MANIFEST_FILES) {
             file = directory.findFile(manifest);
@@ -86,7 +86,7 @@ public final class OdooModuleUtil {
         return file == null ? null : file.getOriginalFile();
     }
 
-    public static Set<OdooModule> getModules(@NotNull Project project) {
+    public static Set<OdooModule> getAllModules(@NotNull Project project) {
         return OdooModuleIndex.getAllModules(project);
     }
 
@@ -103,49 +103,8 @@ public final class OdooModuleUtil {
                 .collect(Collectors.toList());
     }
 
-    public static OdooModule getModule(@NotNull VirtualFile file, @NotNull Project project) {
-        VirtualFile odooDirectory = getOdooModuleDirectory(file);
-        if (odooDirectory == null)
-            return null;
-        PsiDirectory odooDir = PsiManager.getInstance(project).findDirectory(odooDirectory);
-        if (odooDir == null)
-            return null;
-        return getModule(odooDir);
-    }
-
-    public static OdooModule getModule(@NotNull PsiDirectory odooDirectory) {
-        // Call getOriginalElement() to avoid using the copied PsiDirectory and to use data stored inside original directory
-        odooDirectory = (PsiDirectory) odooDirectory.getOriginalElement();
-        PsiFile manifest = getManifest(odooDirectory);
-        if (manifest == null)
-            return null;
-        return new OdooModule(odooDirectory, manifest);
-    }
-
-    public static OdooModule getModule(@NotNull PsiFile manifest) {
-        // Call getOriginalFile() to avoid using the copied PsiFile and to use data stored inside original file
-        manifest = manifest.getOriginalFile();
-        PsiDirectory odooDirectory = manifest.getParent();
-        if (odooDirectory == null)
-            return null;
-        return new OdooModule(odooDirectory, manifest);
-    }
-
-    public static OdooModule getModule(@NotNull String moduleName, @NotNull Project project) {
-        return OdooModuleIndex.getModule(moduleName, project);
-    }
-
-    public static OdooModule getModule(@NotNull PsiElement element) {
-        if (element instanceof PsiFile)
-            return getModule((PsiFile) element);
-        if (element instanceof PsiDirectory)
-            return getModule((PsiDirectory) element);
-        if (element instanceof PomTargetPsiElement) {
-            PomTarget target = ((PomTargetPsiElement) element).getTarget();
-            if (target instanceof PsiTarget)
-                return getModule(((PsiTarget) target).getNavigationElement());
-        }
-        return getModule(element.getContainingFile());
+    public static OdooModule getModuleFromDirectory(@NotNull PsiDirectory psiDirectory) {
+        return getModule(psiDirectory.getVirtualFile(), psiDirectory.getProject());
     }
 
     public static OdooModule getModuleFromFile(@NotNull PsiFile file) {
@@ -155,7 +114,34 @@ public final class OdooModuleUtil {
         return getModule(vFile, file.getProject());
     }
 
-    public static OdooModule getModuleFromDirectory(@NotNull PsiDirectory directory) {
-        return getModule(directory.getVirtualFile(), directory.getProject());
+    public static OdooModule getModule(@NotNull VirtualFile vFile, @NotNull Project project) {
+        VirtualFile odooDirectory = getOdooModuleDirectory(vFile);
+        if (odooDirectory == null)
+            return null;
+        PsiDirectory odooDir = PsiManager.getInstance(project).findDirectory(odooDirectory);
+        if (odooDir == null)
+            return null;
+        odooDir = (PsiDirectory) odooDir.getOriginalElement();
+        PsiFile manifest = getManifestFromDirectory(odooDir);
+        if (manifest == null)
+            return null;
+        return new OdooModule(odooDir, manifest.getOriginalFile());
+    }
+
+    public static OdooModule getModule(@NotNull String moduleName, @NotNull Project project) {
+        return OdooModuleIndex.getModule(moduleName, project);
+    }
+
+    public static OdooModule getModule(@NotNull PsiElement element) {
+        if (element instanceof PsiFile)
+            return getModuleFromFile((PsiFile) element);
+        if (element instanceof PsiDirectory)
+            return getModuleFromDirectory((PsiDirectory) element);
+        if (element instanceof PomTargetPsiElement) {
+            PomTarget target = ((PomTargetPsiElement) element).getTarget();
+            if (target instanceof PsiTarget)
+                return getModule(((PsiTarget) target).getNavigationElement());
+        }
+        return getModuleFromFile(element.getContainingFile());
     }
 }

@@ -82,12 +82,15 @@ public class OdooModuleIndex extends ScalarIndexExtension<String> {
 
     public static Set<OdooModule> getAllModules(@NotNull Project project) {
         Set<OdooModule> modules = new HashSet<>();
-        Collection<String> moduleNames = FileBasedIndex.getInstance().getAllKeys(NAME, project);
-        for (String moduleName : moduleNames) {
+        for (String moduleName : getAllStringModules(project)) {
             OdooModule module = getModule(moduleName, project);
             if (module != null)
                 modules.add(module);
         }
         return modules;
+    }
+
+    public static Collection<String> getAllStringModules(@NotNull Project project) {
+        return FileBasedIndex.getInstance().getAllKeys(NAME, project);
     }
 }

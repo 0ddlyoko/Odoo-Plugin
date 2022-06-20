@@ -33,8 +33,6 @@ public class OdooModuleResolver implements PyImportResolver {
             OdooModule target = OdooModuleUtil.getModule(moduleName, context.getProject());
             if (target == null)
                 return null;
-            if (!currentModule.canSeeModule(moduleName))
-                return null;
             return PyResolveImportUtil.resolveModuleAt(name.subQualifiedName(3, name.getComponentCount()), target.getDirectory(), context)
                     .stream()
                     .findFirst().orElse(null);

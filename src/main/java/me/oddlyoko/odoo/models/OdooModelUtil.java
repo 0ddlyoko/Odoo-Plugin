@@ -10,10 +10,15 @@ import me.oddlyoko.odoo.models.models.ModelDescriptor;
 import me.oddlyoko.odoo.models.models.OdooModel;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class OdooModelUtil {
+    public static final String NAME_KEY = "_name";
+    public static final String DESCRIPTION_KEY = "_description";
+    public static final String INHERIT_KEY = "_inherit";
+    public static final String INHERITS_KEY = "_inherits";
 
     private OdooModelUtil() {}
 
@@ -23,31 +28,36 @@ public final class OdooModelUtil {
      * @param pyClass {@link PyClass} to check
      * @return <i>true</i> if given {@link PyClass} is a valid model
      */
-    public static boolean isValidModel(@NotNull PyClass pyClass) {
-        OdooModel model = getModel(pyClass);
-        if (model == null)
+    public static boolean isInvalidOdooPyClass(@NotNull PyClass pyClass) {
+        OdooModel odooPyClass = getOdooPyClass(pyClass);
+        if (odooPyClass == null)
             return false;
-        return model.isValid();
+        return odooPyClass.isInvalidOdooClass();
     }
 
     /**
-     * Retrieves {@link OdooModel} that is saved in given {@link PyClass}
+     * Retrieves {@link OdooModel} that is the child of {@link PyClass}
      *
      * @param pyClass The {@link PyClass} which has the saved {@link OdooModel}
-     * @return An {@link OdooModel} instance that has been saved in given {@link PyClass}, or null if not found
+     * @return An {@link OdooModel} instance that is the child of {@link PyClass}, or null if not found
      */
-    public static OdooModel getModel(@NotNull PyClass pyClass) {
-        return OdooModel.fromPyClass(((PyClass) pyClass.getOriginalElement()));
+    public static OdooModel getOdooPyClass(@NotNull PyClass pyClass) {
+        if (pyClass instanceof OdooModel)
+            return (OdooModel) pyClass;
+        OdooModel odooPyClass = new OdooModel(pyClass.getNode());
+        if (odooPyClass.isInvalidOdooClass())
+            return odooPyClass;
+        return null;
     }
 
     /**
      * Retrieves {@link ModelDescriptor} that is saved in given {@link PyClass}
      *
-     * @param pyClass The {@link PyClass} which has the saved {@link OdooModel}
+     * @param pyClass The {@link PyClass}
      * @return A {@link ModelDescriptor} instance that has been saved in given {@link PyClass}, or null if not found
      */
     public static ModelDescriptor getDescriptor(@NotNull PyClass pyClass) {
-        return ModelDescriptor.fromPyClass(((PyClass) pyClass.getOriginalElement()));
+        return ModelDescriptor.fromPyClass(pyClass);
     }
 
     /**
@@ -57,10 +67,10 @@ public final class OdooModelUtil {
      * @return Name of the odoo model from given {@link PyClass}, or null
      */
     public static String getModelName(@NotNull PyClass pyClass) {
-        OdooModel model = getModel(pyClass);
-        if (model == null)
+        OdooModel odooPyClass = getOdooPyClass(pyClass);
+        if (odooPyClass == null)
             return null;
-        ModelDescriptor modelDescriptor = model.getModelDescriptor();
+        ModelDescriptor modelDescriptor = odooPyClass.getModelDescriptor();
         if (modelDescriptor == null)
             return null;
         return modelDescriptor.getOdooModel();
@@ -81,15 +91,15 @@ public final class OdooModelUtil {
     }
 
     /**
-     * Retrieves {@link OdooModel OdooModels} from given list of {@link PyClass}
+     * Retrieves {@link OdooModel} from given list of {@link PyClass}
      *
      * @param pyClasses The list of classes
      * @return A {@link List} containing {@link OdooModel}
      */
-    public static List<OdooModel> getModels(List<PyClass> pyClasses) {
-        List<OdooModel> models = new ArrayList<>();
+    public static Set<OdooModel> getModels(List<PyClass> pyClasses) {
+        Set<OdooModel> models = new HashSet<>();
         pyClasses.forEach(pyClass -> {
-            OdooModel model = getModel(pyClass);
+            OdooModel model = getOdooPyClass(pyClass);
             if (model != null)
                 models.add(model);
         });
@@ -97,13 +107,13 @@ public final class OdooModelUtil {
     }
 
     /**
-     * Retrieves {@link OdooModel OdooModels} from given {@link VirtualFile} inside given {@link Project}
+     * Retrieves {@link OdooModel} from given {@link VirtualFile} inside given {@link Project}
      *
      * @param file    The file
      * @param project The project
      * @return A {@link List} containing {@link OdooModel} that are inside given {@link VirtualFile} of given {@link Project}
      */
-    public static List<OdooModel> getModels(@NotNull VirtualFile file, @NotNull Project project) {
+    public static Set<OdooModel> getModels(@NotNull VirtualFile file, @NotNull Project project) {
         return getModels(getClasses(file, project));
     }
 }

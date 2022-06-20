@@ -8,7 +8,6 @@ import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PySequenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyUtil;
-import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -123,10 +122,6 @@ public final class ModuleDescriptor {
     @Override
     public String toString() {
         return id;
-    }
-
-    public static ModuleDescriptor parseDirectory(@NotNull PsiDirectory directory) {
-        return parseFile(OdooModuleUtil.getManifest(directory));
     }
 
     public static ModuleDescriptor parseFile(@NotNull PsiFile manifest) {
