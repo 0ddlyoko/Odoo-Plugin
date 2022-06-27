@@ -15,11 +15,12 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileBasedIndex implementation="me.oddlyoko.odoo.models.indexes.OdooModelIndex" />
         <fileBasedIndex implementation="me.oddlyoko.odoo.modules.indexes.OdooModuleIndex" />
         <fileBasedIndex implementation="me.oddlyoko.odoo.modules.indexes.OdooModuleDependencyIndex" />
+        <fileBasedIndex implementation="me.oddlyoko.odoo.models.indexes.OdooModelIndex" />
 
         <psi.referenceContributor implementation="me.oddlyoko.odoo.modules.reference.OdooManifestReferenceContributor" />
+        <lang.parserDefinition implementationClass="me.oddlyoko.odoo.python.OdooPythonParserDefinition" language="Python" order="first" />
     </extensions>
 
     <extensions defaultExtensionNs="Pythonid">
@@ -27,7 +28,4 @@
         <pyModuleMembersProvider implementation="me.oddlyoko.odoo.modules.OdooModuleAddonsMembersProvider" />
         <inspectionExtension implementation="me.oddlyoko.odoo.highlighting.OdooPyInspectionExtension" />
     </extensions>
-
-    <actions>
-    </actions>
 </idea-plugin>

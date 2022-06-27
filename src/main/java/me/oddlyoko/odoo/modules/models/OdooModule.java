@@ -1,36 +1,41 @@
 package me.oddlyoko.odoo.modules.models;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.util.CachedValue;
-import com.intellij.psi.util.CachedValueProvider;
-import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.jetbrains.python.PythonFileType;
+import me.oddlyoko.odoo.OdooUtil;
+import me.oddlyoko.odoo.models.OdooModelUtil;
+import me.oddlyoko.odoo.models.models.OdooModel;
 import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represent an odoo module
  */
 public final class OdooModule {
-    public static final Key<CachedValue<ModuleDescriptor>> MODULE_DESCRIPTOR_KEY = new Key<>("module.descriptor");
-    public static final Key<CachedValue<Set<String>>> MODULE_DEPENDS_KEY = new Key<>("module.depends.all");
+    private static final String KEY_MODULE_DESCRIPTOR = "module.descriptor";
+    private static final String KEY_MODULE_DEPENDS = "module.depends.all";
+    private static final String KEY_MODULE_DEPENDS_ODOO_MODULE = "module.depends.all.odoo.module";
+
+    private static final String KEY_FILES = "module.files";
+    private static final String KEY_PYTHON_FILES = "module.files.python";
+    private static final String KEY_PYTHON_FILES_DEPENDS = "module.files.python.depends";
+    private static final String KEY_ODOO_MODELS = "module.models";
 
     private final PsiDirectory directory;
     private final PsiFile manifestFile;
 
-    public OdooModule(@NotNull PsiDirectory directory) {
-        this(directory, OdooModuleUtil.getManifest(directory));
-    }
-
-    public OdooModule(@NotNull PsiDirectory directory, @Nullable PsiFile manifestFile) {
+    public OdooModule(@NotNull PsiDirectory directory, @NotNull PsiFile manifestFile) {
         this.directory = directory;
         this.manifestFile = manifestFile;
     }
@@ -40,7 +45,7 @@ public final class OdooModule {
         return directory;
     }
 
-    @Nullable
+    @NotNull
     public PsiFile getManifestFile() {
         return manifestFile;
     }
@@ -55,21 +60,19 @@ public final class OdooModule {
     }
 
     public ModuleDescriptor getModuleDescriptor() {
-        return CachedValuesManager.getCachedValue(manifestFile, MODULE_DESCRIPTOR_KEY, () -> {
-            ModuleDescriptor descriptor = ModuleDescriptor.parseFile(manifestFile);
-            return CachedValueProvider.Result.create(descriptor, manifestFile);
-        });
+        return OdooUtil.getData(getDirectory(), KEY_MODULE_DESCRIPTOR, () ->
+                ModuleDescriptor.parseFile(manifestFile));
     }
 
     /**
-     * Retrieves modules that are a depends of this {@link OdooModule}
+     * Retrieves modules that are a depend of this {@link OdooModule}
      *
-     * @return A {@link Set}
+     * @return A {@link List}
      */
-    public Set<String> getModuleDepends() {
-        return CachedValuesManager.getCachedValue(manifestFile, MODULE_DEPENDS_KEY, () -> {
+    public List<String> getModuleDepends() {
+        return OdooUtil.getData(getDirectory(), KEY_MODULE_DEPENDS, () -> {
             ModuleDescriptor descriptor = getModuleDescriptor();
-            Set<String> result = new HashSet<>();
+            List<String> result = new ArrayList<>();
             if (descriptor != null) {
                 for (String depend : descriptor.getDepends()) {
                     OdooModule module = OdooModuleUtil.getModule(depend, getProject());
@@ -79,8 +82,27 @@ public final class OdooModule {
                     }
                 }
             }
-            return CachedValueProvider.Result.create(Collections.unmodifiableSet(result), manifestFile);
+            return Collections.unmodifiableList(result);
         });
+    }
+
+    /**
+     * Retrieves modules that are a depend of this {@link OdooModule}
+     *
+     * @return A {@link List}
+     */
+    public List<OdooModule> getModules(boolean includeThisOne) {
+        List<OdooModule> modules = new ArrayList<>();
+        // Add this module at first in the list
+        if (includeThisOne)
+            modules.add(this);
+        modules.addAll(OdooUtil.getData(getDirectory(), KEY_MODULE_DEPENDS_ODOO_MODULE, () ->
+                getModuleDepends().stream()
+                        .map(s -> OdooModuleUtil.getModule(s, getProject()))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())
+        ));
+        return modules;
     }
 
     /**
@@ -92,6 +114,59 @@ public final class OdooModule {
      */
     public boolean canSeeModule(String target) {
         return getModuleDepends().contains(target);
+    }
+
+    /**
+     * Retrieves files that are in this {@link OdooModule}
+     *
+     * @return A {@link List} of {@link VirtualFile}
+     */
+    public List<VirtualFile> getVirtualFiles(boolean includeDepends) {
+        if (!includeDepends)
+            return OdooUtil.getData(getDirectory(), KEY_FILES, () -> {
+                List<VirtualFile> files = new ArrayList<>();
+                VfsUtil.processFilesRecursively(getDirectory().getVirtualFile(), files::add);
+                return files;
+            });
+
+        return getModules(true).stream()
+                .flatMap(odooModule -> odooModule.getVirtualFiles(false).stream())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves files that are in this {@link OdooModule} and are python files
+     *
+     * @return A {@link List} of {@link VirtualFile}
+     */
+    public List<VirtualFile> getPythonFiles(boolean includeDepends) {
+        return OdooUtil.getData(getDirectory(), includeDepends ? KEY_PYTHON_FILES_DEPENDS : KEY_PYTHON_FILES, () ->
+                getVirtualFiles(includeDepends).stream()
+                        .filter(file -> file.getFileType() == PythonFileType.INSTANCE)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Retrieves models that are defined in this {@link OdooModule}<br />
+     * If <i>includeDepends</i> is <i>true</i> then models defined in depends modules are also retrieved
+     *
+     * @param includeDepends <i>true</i> to include models defined in depends modules
+     * @return A {@link List} of {@link OdooModel}
+     */
+    public List<OdooModel> getModels(boolean includeDepends) {
+        if (!includeDepends)
+            return OdooUtil.getData(getDirectory(), KEY_ODOO_MODELS, () ->
+                    getPythonFiles(false).stream()
+                            .flatMap(file -> OdooModelUtil.getModels(file, getProject()).stream())
+                            .collect(Collectors.toList()));
+
+        return getModules(true).stream()
+                .flatMap(odooModule -> odooModule.getModels(false).stream())
+                .collect(Collectors.toList());
+    }
+
+    public GlobalSearchScope getOdooModuleScope(boolean includeDepends) {
+        return GlobalSearchScope.filesWithLibrariesScope(getProject(), getVirtualFiles(includeDepends));
     }
 
     @Override

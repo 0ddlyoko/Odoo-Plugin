@@ -10,6 +10,7 @@ import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyUtil;
+import me.oddlyoko.odoo.models.OdooModelUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,10 +89,10 @@ public final class ModelDescriptor {
     }
 
     /**
-     * Retrieves existing {@link ModelDescriptor} linked to given {@link PyClass} or create it
+     * Retrieves existing {@link ModelDescriptor} linked to given {@link OdooModel} or create it
      *
      * @param pyClass The {@link PyClass}
-     * @return Existing {@link OdooModel} linked to given {@link PyClass} or new one
+     * @return Existing {@link ModelDescriptor} linked to given {@link OdooModel} or new one
      */
     public static ModelDescriptor fromPyClass(PyClass pyClass) {
         return CachedValuesManager.getCachedValue(pyClass, MODEL_DESCRIPTOR_KEY,
@@ -110,21 +111,21 @@ public final class ModelDescriptor {
         List<String> inherit = new ArrayList<>();
         Map<String, String> inherits = new HashMap<>();
         // _name
-        PyTargetExpression pyNameExpression = pyClass.findClassAttribute(OdooModel.NAME_KEY, false, null);
+        PyTargetExpression pyNameExpression = pyClass.findClassAttribute(OdooModelUtil.NAME_KEY, false, null);
         if (pyNameExpression != null) {
             PyExpression valueExpression = pyNameExpression.findAssignedValue();
             if (valueExpression instanceof PyStringLiteralExpression)
                 odooModel = ((PyStringLiteralExpression) valueExpression).getStringValue();
         }
         // _description
-        PyTargetExpression pyDescriptionExpression = pyClass.findClassAttribute(OdooModel.DESCRIPTION_KEY, false, null);
+        PyTargetExpression pyDescriptionExpression = pyClass.findClassAttribute(OdooModelUtil.DESCRIPTION_KEY, false, null);
         if (pyDescriptionExpression != null) {
             PyExpression valueExpression = pyDescriptionExpression.findAssignedValue();
             if (valueExpression instanceof PyStringLiteralExpression)
                 description = ((PyStringLiteralExpression) valueExpression).getStringValue();
         }
         // _inherit
-        PyTargetExpression pyInheritExpression = pyClass.findClassAttribute(OdooModel.INHERIT_KEY, false, null);
+        PyTargetExpression pyInheritExpression = pyClass.findClassAttribute(OdooModelUtil.INHERIT_KEY, false, null);
         if (pyInheritExpression != null) {
             PyExpression valueExpression = pyInheritExpression.findAssignedValue();
             if (valueExpression instanceof PyStringLiteralExpression) {
@@ -141,7 +142,7 @@ public final class ModelDescriptor {
         if (odooModel == null)
             return null;
         // _inherits
-        PyTargetExpression pyInheritsExpression = pyClass.findClassAttribute(OdooModel.INHERITS_KEY, false, null);
+        PyTargetExpression pyInheritsExpression = pyClass.findClassAttribute(OdooModelUtil.INHERITS_KEY, false, null);
         if (pyInheritsExpression != null) {
             PyExpression valueExpression = pyInheritsExpression.findAssignedValue();
             if (valueExpression instanceof PyDictLiteralExpression) {
