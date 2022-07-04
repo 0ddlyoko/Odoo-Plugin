@@ -46,8 +46,8 @@ public final class OdooModelUtil {
             return (OdooModel) pyClass;
         OdooModel odooPyClass = new OdooModel(pyClass.getNode());
         if (odooPyClass.isInvalidOdooClass())
-            return odooPyClass;
-        return null;
+            return null;
+        return odooPyClass;
     }
 
     /**
