@@ -12,6 +12,8 @@
     <depends>com.intellij.modules.python</depends>
 
     <applicationListeners>
+        <listener class="me.oddlyoko.odoo.modules.listener.OdooModuleModificationListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener" />
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">

@@ -11,6 +11,8 @@ import me.oddlyoko.odoo.OdooUtil;
 import me.oddlyoko.odoo.models.OdooModelUtil;
 import me.oddlyoko.odoo.models.models.OdooModel;
 import me.oddlyoko.odoo.modules.OdooModuleUtil;
+import me.oddlyoko.odoo.modules.tracker.OdooManifestModificationTracker;
+import me.oddlyoko.odoo.modules.tracker.OdooModuleModificationTracker;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -61,7 +63,7 @@ public final class OdooModule {
 
     public ModuleDescriptor getModuleDescriptor() {
         return OdooUtil.getData(getDirectory(), KEY_MODULE_DESCRIPTOR, () ->
-                ModuleDescriptor.parseFile(manifestFile));
+                ModuleDescriptor.parseFile(manifestFile), OdooManifestModificationTracker.get(directory.getName()));
     }
 
     /**
@@ -83,7 +85,7 @@ public final class OdooModule {
                 }
             }
             return Collections.unmodifiableList(result);
-        });
+        }, OdooManifestModificationTracker.get(directory.getName()));
     }
 
     /**
@@ -100,7 +102,7 @@ public final class OdooModule {
                 getModuleDepends().stream()
                         .map(s -> OdooModuleUtil.getModule(s, getProject()))
                         .filter(Objects::nonNull)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()), OdooManifestModificationTracker.get(directory.getName())
         ));
         return modules;
     }
@@ -127,7 +129,7 @@ public final class OdooModule {
                 List<VirtualFile> files = new ArrayList<>();
                 VfsUtil.processFilesRecursively(getDirectory().getVirtualFile(), files::add);
                 return files;
-            });
+            }, OdooModuleModificationTracker.get(directory.getName()));
 
         return getModules(true).stream()
                 .flatMap(odooModule -> odooModule.getVirtualFiles(false).stream())
@@ -143,7 +145,7 @@ public final class OdooModule {
         return OdooUtil.getData(getDirectory(), includeDepends ? KEY_PYTHON_FILES_DEPENDS : KEY_PYTHON_FILES, () ->
                 getVirtualFiles(includeDepends).stream()
                         .filter(file -> file.getFileType() == PythonFileType.INSTANCE)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()), OdooModuleModificationTracker.get(directory.getName()));
     }
 
     /**
@@ -158,7 +160,7 @@ public final class OdooModule {
             return OdooUtil.getData(getDirectory(), KEY_ODOO_MODELS, () ->
                     getPythonFiles(false).stream()
                             .flatMap(file -> OdooModelUtil.getModels(file, getProject()).stream())
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList()), OdooModuleModificationTracker.get(directory.getName()));
 
         return getModules(true).stream()
                 .flatMap(odooModule -> odooModule.getModels(false).stream())
