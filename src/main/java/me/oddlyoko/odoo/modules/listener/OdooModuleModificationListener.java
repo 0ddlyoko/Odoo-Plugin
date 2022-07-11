@@ -22,7 +22,7 @@ public class OdooModuleModificationListener implements BulkFileListener {
             if (vFile == null)
                 continue;
             VirtualFile odooDirectory = OdooModuleUtil.getOdooModuleDirectory(vFile);
-            if (odooDirectory == null)
+            if (odooDirectory == null || !odooDirectory.exists())
                 return;
             String name = odooDirectory.getName();
             OdooModuleModificationTracker.get(name).incModificationCount();

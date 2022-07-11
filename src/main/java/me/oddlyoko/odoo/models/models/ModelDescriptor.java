@@ -1,15 +1,13 @@
 package me.oddlyoko.odoo.models.models;
 
-import com.intellij.openapi.util.Key;
-import com.intellij.psi.util.CachedValue;
-import com.intellij.psi.util.CachedValueProvider;
-import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.PsiInvalidElementAccessException;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDictLiteralExpression;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyUtil;
+import me.oddlyoko.odoo.OdooUtil;
 import me.oddlyoko.odoo.models.OdooModelUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +22,7 @@ import java.util.Objects;
  * A description of a model
  */
 public final class ModelDescriptor {
-    public static final Key<CachedValue<ModelDescriptor>> MODEL_DESCRIPTOR_KEY = new Key<>("model.descriptor");
+    public static final String MODEL_DESCRIPTOR_KEY = "model.descriptor";
 
     private final PyClass pyClass;
     private final String odooModel;
@@ -95,8 +93,11 @@ public final class ModelDescriptor {
      * @return Existing {@link ModelDescriptor} linked to given {@link OdooModel} or new one
      */
     public static ModelDescriptor fromPyClass(PyClass pyClass) {
-        return CachedValuesManager.getCachedValue(pyClass, MODEL_DESCRIPTOR_KEY,
-                () -> CachedValueProvider.Result.create(parsePyClass(pyClass), pyClass));
+        try {
+            return OdooUtil.getData(pyClass.getOriginalElement(), MODEL_DESCRIPTOR_KEY, () -> parsePyClass(pyClass), pyClass);
+        } catch (PsiInvalidElementAccessException ex) {
+            return null;
+        }
     }
 
     /**

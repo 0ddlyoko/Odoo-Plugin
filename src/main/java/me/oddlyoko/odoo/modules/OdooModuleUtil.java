@@ -23,6 +23,7 @@ public final class OdooModuleUtil {
             "__openerp__.py"
     );
     public static final String INIT_FILE = "__init__.py";
+    public static final String BASE_MODULE = "base";
 
     private OdooModuleUtil() {}
 

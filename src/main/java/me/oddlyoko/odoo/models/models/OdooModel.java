@@ -9,14 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class OdooModel extends PyClassImpl {
 
-    private final String odooModel;
-    private final boolean invalid;
-
     public OdooModel(@NotNull ASTNode astNode) {
         super(astNode);
-        ModelDescriptor descriptor = getModelDescriptor();
-        this.odooModel = descriptor != null ? descriptor.getOdooModel() : null;
-        this.invalid = odooModel == null;
     }
 
     public OdooModule getOdooModule() {
@@ -24,7 +18,8 @@ public class OdooModel extends PyClassImpl {
     }
 
     public String getOdooModel() {
-        return odooModel;
+        ModelDescriptor descriptor = getModelDescriptor();
+        return descriptor != null ? descriptor.getOdooModel() : null;
     }
 
     public ModelDescriptor getModelDescriptor() {
@@ -32,7 +27,7 @@ public class OdooModel extends PyClassImpl {
     }
 
     public boolean isInvalidOdooClass() {
-        return invalid;
+        return getOdooModel() == null;
     }
 
     @Override
