@@ -1,11 +1,25 @@
-<idea-plugin>
+<idea-plugin url="https://github.com/0ddlyoko/Odoo-Plugin">
     <id>me.oddlyoko.odoo</id>
-    <name>Odoo</name>
+    <name>Odoo Support</name>
     <vendor email="nathangiaco@hotmail.com" url="https://0ddlyoko.be">Giacomello Nathan</vendor>
 
     <description><![CDATA[
-    Plugin used to fastly create odoo plugin
+    Provides support for <a href="https://www.odoo.com">Odoo</a>.
+    Use this plugin to fastly create odoo module
     ]]></description>
+
+    <change-notes><![CDATA[
+    <ul>
+        <li>
+            Version alpha 0.0.1
+            <ul>
+                <li>Odoo Support</li>
+                <li>Support for manifest file (depends, data, views)</li>
+                <li>Support for <i>from odoo.addons.xxx</i> completion</li>
+            </ul>
+        </li>
+    </ul>
+    ]]></change-notes>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
          on how to target different products -->
