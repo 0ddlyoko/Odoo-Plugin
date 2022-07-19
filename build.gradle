@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'me.oddlyoko'
-version '0.0.1'
+version '0.0.2'
 
 repositories {
     mavenCentral()
@@ -31,4 +31,9 @@ java {
 
 test {
     useJUnitPlatform()
+}
+
+patchPluginXml {
+    sinceBuild = '210'
+    untilBuild = '221.*'
 }

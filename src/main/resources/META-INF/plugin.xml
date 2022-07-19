@@ -2,7 +2,6 @@
     <id>me.oddlyoko.odoo</id>
     <name>Odoo Support</name>
     <vendor email="nathangiaco@hotmail.com" url="https://0ddlyoko.be">Giacomello Nathan</vendor>
-    <idea-version since-build="213" />
 
     <description><![CDATA[
     Provides support for <a href="https://www.odoo.com">Odoo</a>.
@@ -11,6 +10,12 @@
 
     <change-notes><![CDATA[
     <ul>
+        <li>
+            Version alpha 0.0.2
+            <ul>
+                <li>Fix issue with PyCharm version</li>
+            </ul>
+        </li>
         <li>
             Version alpha 0.0.1
             <ul>
