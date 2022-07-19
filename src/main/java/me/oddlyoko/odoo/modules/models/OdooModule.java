@@ -8,29 +8,26 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jetbrains.python.PythonFileType;
 import me.oddlyoko.odoo.OdooUtil;
-import me.oddlyoko.odoo.models.OdooModelUtil;
-import me.oddlyoko.odoo.models.models.OdooModel;
+import me.oddlyoko.odoo.models.indexes.OdooModelIndex;
 import me.oddlyoko.odoo.modules.OdooModuleUtil;
+import me.oddlyoko.odoo.modules.indexes.OdooModuleDependencyIndex;
+import me.oddlyoko.odoo.modules.trackers.OdooManifestModificationTracker;
+import me.oddlyoko.odoo.modules.trackers.OdooModuleModificationTracker;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represent an odoo module
  */
 public final class OdooModule {
     private static final String KEY_MODULE_DESCRIPTOR = "module.descriptor";
-    private static final String KEY_MODULE_DEPENDS = "module.depends.all";
-    private static final String KEY_MODULE_DEPENDS_ODOO_MODULE = "module.depends.all.odoo.module";
 
     private static final String KEY_FILES = "module.files";
-    private static final String KEY_PYTHON_FILES = "module.files.python";
-    private static final String KEY_PYTHON_FILES_DEPENDS = "module.files.python.depends";
-    private static final String KEY_ODOO_MODELS = "module.models";
 
     private final PsiDirectory directory;
     private final PsiFile manifestFile;
@@ -61,29 +58,28 @@ public final class OdooModule {
 
     public ModuleDescriptor getModuleDescriptor() {
         return OdooUtil.getData(getDirectory(), KEY_MODULE_DESCRIPTOR, () ->
-                ModuleDescriptor.parseFile(manifestFile));
+                ModuleDescriptor.parseFile(manifestFile), manifestFile);
     }
 
     /**
      * Retrieves modules that are a depend of this {@link OdooModule}
      *
-     * @return A {@link List}
+     * @return An unmodifiable {@link List}
      */
     public List<String> getModuleDepends() {
-        return OdooUtil.getData(getDirectory(), KEY_MODULE_DEPENDS, () -> {
-            ModuleDescriptor descriptor = getModuleDescriptor();
-            List<String> result = new ArrayList<>();
-            if (descriptor != null) {
-                for (String depend : descriptor.getDepends()) {
-                    OdooModule module = OdooModuleUtil.getModule(depend, getProject());
-                    if (module != null) {
-                        result.add(depend);
-                        result.addAll(module.getModuleDepends());
-                    }
-                }
+        List<String> result = new ArrayList<>();
+        for (String depend : getDirectModuleDepends()) {
+            OdooModule module = OdooModuleUtil.getModule(depend, getProject());
+            if (module != null) {
+                result.add(depend);
+                result.addAll(module.getModuleDepends());
             }
-            return Collections.unmodifiableList(result);
-        });
+        }
+        return result.stream().distinct().collect(Collectors.toUnmodifiableList());
+    }
+
+    public List<OdooModule> getOdooModuleDepends() {
+        return getModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())).collect(Collectors.toList());
     }
 
     /**
@@ -91,18 +87,32 @@ public final class OdooModule {
      *
      * @return A {@link List}
      */
-    public List<OdooModule> getModules(boolean includeThisOne) {
-        List<OdooModule> modules = new ArrayList<>();
-        // Add this module at first in the list
+    public List<OdooModule> getOdooModuleDepends(boolean includeThisOne) {
+        Stream<OdooModule> stream = Stream.concat(
+                getModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())),
+                Stream.of(OdooModuleUtil.getBaseModule(getProject()))
+        );
         if (includeThisOne)
-            modules.add(this);
-        modules.addAll(OdooUtil.getData(getDirectory(), KEY_MODULE_DEPENDS_ODOO_MODULE, () ->
-                getModuleDepends().stream()
-                        .map(s -> OdooModuleUtil.getModule(s, getProject()))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())
-        ));
-        return modules;
+            stream = Stream.concat(Stream.of(this), stream);
+
+        return stream.filter(Objects::nonNull).distinct().collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves direct module dependencies of this {@link OdooModule}
+     * 
+     * @return A modifiable {@link List}
+     */
+    public List<String> getDirectModuleDepends() {
+        return OdooModuleDependencyIndex.getDepends(getManifestFile().getVirtualFile(), getProject());
+    }
+
+    public List<OdooModule> getDirectOdooModuleDepends() {
+        return getDirectModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())).collect(Collectors.toList());
+    }
+
+    public List<OdooModule> getOdooModuleDepending() {
+        return OdooModuleDependencyIndex.getOdooDepending(getName(), getProject());
     }
 
     /**
@@ -127,9 +137,9 @@ public final class OdooModule {
                 List<VirtualFile> files = new ArrayList<>();
                 VfsUtil.processFilesRecursively(getDirectory().getVirtualFile(), files::add);
                 return files;
-            });
+            }, getOdooModuleModificationTracker());
 
-        return getModules(true).stream()
+        return getOdooModuleDepends(true).stream()
                 .flatMap(odooModule -> odooModule.getVirtualFiles(false).stream())
                 .collect(Collectors.toList());
     }
@@ -140,33 +150,29 @@ public final class OdooModule {
      * @return A {@link List} of {@link VirtualFile}
      */
     public List<VirtualFile> getPythonFiles(boolean includeDepends) {
-        return OdooUtil.getData(getDirectory(), includeDepends ? KEY_PYTHON_FILES_DEPENDS : KEY_PYTHON_FILES, () ->
-                getVirtualFiles(includeDepends).stream()
-                        .filter(file -> file.getFileType() == PythonFileType.INSTANCE)
-                        .collect(Collectors.toList()));
+        return getVirtualFiles(includeDepends).stream()
+                .filter(file -> file.getFileType() == PythonFileType.INSTANCE)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Retrieves models that are defined in this {@link OdooModule}<br />
-     * If <i>includeDepends</i> is <i>true</i> then models defined in depends modules are also retrieved
-     *
-     * @param includeDepends <i>true</i> to include models defined in depends modules
-     * @return A {@link List} of {@link OdooModel}
-     */
-    public List<OdooModel> getModels(boolean includeDepends) {
-        if (!includeDepends)
-            return OdooUtil.getData(getDirectory(), KEY_ODOO_MODELS, () ->
-                    getPythonFiles(false).stream()
-                            .flatMap(file -> OdooModelUtil.getModels(file, getProject()).stream())
-                            .collect(Collectors.toList()));
-
-        return getModules(true).stream()
-                .flatMap(odooModule -> odooModule.getModels(false).stream())
-                .collect(Collectors.toList());
+    public List<String> getModels(boolean includeDepends) {
+        return new ArrayList<>(OdooModelIndex.getAllModels(getProject(), getOdooPythonModuleScope(includeDepends)));
     }
 
     public GlobalSearchScope getOdooModuleScope(boolean includeDepends) {
         return GlobalSearchScope.filesWithLibrariesScope(getProject(), getVirtualFiles(includeDepends));
+    }
+
+    public GlobalSearchScope getOdooPythonModuleScope(boolean includeDepends) {
+        return GlobalSearchScope.filesWithLibrariesScope(getProject(), getPythonFiles(includeDepends));
+    }
+
+    public OdooManifestModificationTracker getOdooManifestModificationTracker() {
+        return OdooManifestModificationTracker.get(getName());
+    }
+
+    public OdooModuleModificationTracker getOdooModuleModificationTracker() {
+        return OdooModuleModificationTracker.get(getName());
     }
 
     @Override

@@ -6,10 +6,12 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
+import me.oddlyoko.odoo.models.indexes.OdooModelIndex;
 import me.oddlyoko.odoo.models.models.ModelDescriptor;
 import me.oddlyoko.odoo.models.models.OdooModel;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,8 +48,8 @@ public final class OdooModelUtil {
             return (OdooModel) pyClass;
         OdooModel odooPyClass = new OdooModel(pyClass.getNode());
         if (odooPyClass.isInvalidOdooClass())
-            return odooPyClass;
-        return null;
+            return null;
+        return odooPyClass;
     }
 
     /**
@@ -115,5 +117,15 @@ public final class OdooModelUtil {
      */
     public static Set<OdooModel> getModels(@NotNull VirtualFile file, @NotNull Project project) {
         return getModels(getClasses(file, project));
+    }
+
+    /**
+     * Retrieves all models for given project
+     *
+     * @param project The project
+     * @return A {@link Collection} containing all models defined in this project
+     */
+    public static Collection<String> getAllModels(@NotNull Project project) {
+        return OdooModelIndex.getAllModels(project);
     }
 }

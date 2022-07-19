@@ -40,7 +40,7 @@ public final class OdooUtil {
      */
     public static <E, P> E getData(PsiElement psiElement, P param, Supplier<E> supplier, Object... depends) {
         CachedValuesManager manager = CachedValuesManager.getManager(psiElement.getProject());
-        return getData(psiElement, manager.getKeyForClass(depends.getClass()), param, supplier, depends);
+        return getData(psiElement, manager.getKeyForClass(supplier.getClass()), param, supplier, depends);
     }
 
     /**

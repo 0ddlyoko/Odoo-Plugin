@@ -12,8 +12,8 @@ import com.intellij.util.indexing.ID;
 import com.intellij.util.indexing.ScalarIndexExtension;
 import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
-import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import me.oddlyoko.odoo.modules.OdooManifestFilter;
+import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import me.oddlyoko.odoo.modules.models.ModuleDescriptor;
 import me.oddlyoko.odoo.modules.models.OdooModule;
 import org.jetbrains.annotations.NotNull;
@@ -40,14 +40,14 @@ public class OdooModuleDependencyIndex extends ScalarIndexExtension<String> {
     @Override
     public DataIndexer<String, Void, FileContent> getIndexer() {
         return inputData -> {
+            Map<String, Void> result = new HashMap<>();
             VirtualFile manifest = inputData.getFile();
             PsiFile file = PsiManager.getInstance(inputData.getProject()).findFile(manifest);
             if (file == null)
-                return Map.of();
+                return result;
             ModuleDescriptor descriptor = ModuleDescriptor.parseFile(file);
             if (descriptor == null)
-                return Map.of();
-            Map<String, Void> result = new HashMap<>();
+                return result;
             descriptor.getDepends().forEach(s -> result.put(s, null));
             return result;
         };
@@ -75,8 +75,20 @@ public class OdooModuleDependencyIndex extends ScalarIndexExtension<String> {
         return true;
     }
 
+    /**
+     * Retrieves direct depend of given manifest file
+     *
+     * @param vManifestFile The manifest file
+     * @param project       The project
+     * @return A list of modules that depends on given manifest file
+     */
     @NotNull
-    public static List<OdooModule> getDepending(@NotNull String moduleName, @NotNull Project project) {
+    public static List<String> getDepends(@NotNull VirtualFile vManifestFile, @NotNull Project project) {
+        return new ArrayList<>(FileBasedIndex.getInstance().getFileData(NAME, vManifestFile, project).keySet());
+    }
+
+    @NotNull
+    public static List<OdooModule> getOdooDepending(@NotNull String moduleName, @NotNull Project project) {
         GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
         Collection<VirtualFile> manifestFiles = FileBasedIndex.getInstance().getContainingFiles(NAME, moduleName, scope);
         List<OdooModule> dependencies = new ArrayList<>();

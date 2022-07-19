@@ -23,6 +23,7 @@ public final class OdooModuleUtil {
             "__openerp__.py"
     );
     public static final String INIT_FILE = "__init__.py";
+    public static final String BASE_MODULE = "base";
 
     private OdooModuleUtil() {}
 
@@ -143,5 +144,9 @@ public final class OdooModuleUtil {
                 return getModule(((PsiTarget) target).getNavigationElement());
         }
         return getModuleFromFile(element.getContainingFile());
+    }
+
+    public static OdooModule getBaseModule(@NotNull Project project) {
+        return getModule(BASE_MODULE, project);
     }
 }
