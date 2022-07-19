@@ -1,4 +1,4 @@
-package me.oddlyoko.odoo.modules.tracker;
+package me.oddlyoko.odoo.modules.trackers;
 
 import com.intellij.openapi.util.SimpleModificationTracker;
 

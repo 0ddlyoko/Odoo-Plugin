@@ -11,11 +11,6 @@
          on how to target different products -->
     <depends>com.intellij.modules.python</depends>
 
-    <applicationListeners>
-        <listener class="me.oddlyoko.odoo.modules.listener.OdooModuleModificationListener"
-                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener" />
-    </applicationListeners>
-
     <extensions defaultExtensionNs="com.intellij">
         <fileBasedIndex implementation="me.oddlyoko.odoo.modules.indexes.OdooModuleIndex" />
         <fileBasedIndex implementation="me.oddlyoko.odoo.modules.indexes.OdooModuleDependencyIndex" />
@@ -23,6 +18,8 @@
 
         <psi.referenceContributor implementation="me.oddlyoko.odoo.modules.reference.OdooManifestReferenceContributor" />
         <lang.parserDefinition implementationClass="me.oddlyoko.odoo.python.OdooPythonParserDefinition" language="Python" order="first" />
+
+        <psi.treeChangePreprocessor implementation="me.oddlyoko.odoo.modules.listener.OdooModuleModificationListener" />
     </extensions>
 
     <extensions defaultExtensionNs="Pythonid">

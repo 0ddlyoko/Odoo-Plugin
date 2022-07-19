@@ -76,7 +76,7 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
 
     @Override
     public int getVersion() {
-        return 5;
+        return 1;
     }
 
     @NotNull

@@ -145,4 +145,8 @@ public final class OdooModuleUtil {
         }
         return getModuleFromFile(element.getContainingFile());
     }
+
+    public static OdooModule getBaseModule(@NotNull Project project) {
+        return getModule(BASE_MODULE, project);
+    }
 }
