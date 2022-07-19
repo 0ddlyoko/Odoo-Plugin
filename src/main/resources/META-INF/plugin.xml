@@ -2,6 +2,7 @@
     <id>me.oddlyoko.odoo</id>
     <name>Odoo Support</name>
     <vendor email="nathangiaco@hotmail.com" url="https://0ddlyoko.be">Giacomello Nathan</vendor>
+    <idea-version since-build="213" />
 
     <description><![CDATA[
     Provides support for <a href="https://www.odoo.com">Odoo</a>.
@@ -41,4 +42,10 @@
         <pyModuleMembersProvider implementation="me.oddlyoko.odoo.modules.OdooModuleAddonsMembersProvider" />
         <inspectionExtension implementation="me.oddlyoko.odoo.highlighting.OdooPyInspectionExtension" />
     </extensions>
+
+    <actions>
+        <action id="me.oddlyoko.odoo.old.MyAction" class="me.oddlyoko.odoo.old.MyAction" text="My Action">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
