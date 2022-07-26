@@ -31,14 +31,13 @@ public class OdooManifestReferenceContributor extends PsiReferenceContributor {
 
     @Override
     public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
-        registrar.registerReferenceProvider(DEPENDS_PATTERN,
-                new PsiReferenceProvider() {
-                    @NotNull
-                    @Override
-                    public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-                        return new PsiReference[] { new OdooModuleReference(element) };
-                    }
-                });
+        registrar.registerReferenceProvider(DEPENDS_PATTERN, new PsiReferenceProvider() {
+            @NotNull
+            @Override
+            public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+                return new PsiReference[] { new OdooModuleReference(element) };
+            }
+        });
         registrar.registerReferenceProvider(DATA_PATTERN,
                 new PsiReferenceProvider() {
                     @NotNull

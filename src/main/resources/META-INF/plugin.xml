@@ -11,6 +11,12 @@
     <change-notes><![CDATA[
     <ul>
         <li>
+            Version alpha 0.0.3
+            <ul>
+                <li>Add autocompletion with inherit</li>
+            </ul>
+        </li>
+        <li>
             Version alpha 0.0.2
             <ul>
                 <li>Fix issue with PyCharm version</li>
@@ -37,6 +43,7 @@
         <fileBasedIndex implementation="me.oddlyoko.odoo.models.indexes.OdooModelIndex" />
 
         <psi.referenceContributor implementation="me.oddlyoko.odoo.modules.reference.OdooManifestReferenceContributor" />
+        <psi.referenceContributor implementation="me.oddlyoko.odoo.models.reference.OdooModelReferenceContributor" />
         <lang.parserDefinition implementationClass="me.oddlyoko.odoo.python.OdooPythonParserDefinition" language="Python" order="first" />
 
         <psi.treeChangePreprocessor implementation="me.oddlyoko.odoo.modules.listener.OdooModuleModificationListener" />

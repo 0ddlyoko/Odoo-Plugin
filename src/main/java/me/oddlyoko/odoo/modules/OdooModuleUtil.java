@@ -143,7 +143,7 @@ public final class OdooModuleUtil {
             if (target instanceof PsiTarget)
                 return getModule(((PsiTarget) target).getNavigationElement());
         }
-        return getModuleFromFile(element.getContainingFile());
+        return getModuleFromFile(element.getContainingFile().getOriginalFile());
     }
 
     public static OdooModule getBaseModule(@NotNull Project project) {

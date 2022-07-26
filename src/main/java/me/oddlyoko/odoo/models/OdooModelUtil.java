@@ -4,11 +4,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import me.oddlyoko.odoo.models.indexes.OdooModelIndex;
 import me.oddlyoko.odoo.models.models.ModelDescriptor;
 import me.oddlyoko.odoo.models.models.OdooModel;
+import me.oddlyoko.odoo.modules.models.OdooModule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -123,9 +125,58 @@ public final class OdooModelUtil {
      * Retrieves all models for given project
      *
      * @param project The project
-     * @return A {@link Collection} containing all models defined in this project
+     * @return A {@link Collection} of string containing all models defined in this project
      */
     public static Collection<String> getAllModels(@NotNull Project project) {
         return OdooModelIndex.getAllModels(project);
+    }
+
+    /**
+     * Retrieves all available models for given project with given scope
+     *
+     * @param project The project
+     * @param scope   The scope
+     * @return A {@link Collection} of String containing all models defined in this project with given scope
+     */
+    public static Collection<String> getAllModels(@NotNull Project project, @NotNull GlobalSearchScope scope) {
+        return OdooModelIndex.getAllModels(project, scope);
+    }
+
+    /**
+     * Retrieves all available models for given project with given {@link OdooModule}
+     *
+     * @param project    The project
+     * @param odooModule The {@link OdooModule}
+     * @return A {@link Collection} of String containing all models defined in this project with given {@link OdooModule}
+     */
+    public static Collection<String> getAllModels(@NotNull Project project, @NotNull OdooModule odooModule) {
+        return OdooModelIndex.getAllModels(project, odooModule.getOdooPythonModuleScope(true));
+    }
+
+    /**
+     * Retrieves all {@link PyClass} instance from given id for given {@link Project}
+     *
+     * @param odooModel The id of the model
+     * @param project   The project
+     * @return A {@link List} containing all {@link PyClass} instance of given id for given {@link Project}
+     */
+    public static List<PyClass> getModelsByName(@NotNull String odooModel, @NotNull Project project) {
+        return OdooModelIndex.getModelsByName(odooModel, project);
+    }
+
+    /**
+     * Retrieves all {@link PyClass} instance from given id for given {@link Project} and scope
+     *
+     * @param odooModel The id of the project
+     * @param project   The project
+     * @param scope     The scope
+     * @return A {@link List} containing all {@link PyClass} instance of given id for given {@link Project}
+     */
+    public static List<PyClass> getModelsByName(@NotNull String odooModel, @NotNull Project project, GlobalSearchScope scope) {
+        return OdooModelIndex.getModelsByName(odooModel, project, scope);
+    }
+
+    public static List<PyClass> getModelsByName(@NotNull String odooModel, @NotNull Project project, OdooModule odooModule) {
+        return OdooModelIndex.getModelsByName(odooModel, project, odooModule.getOdooPythonModuleScope(true));
     }
 }

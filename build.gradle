@@ -1,10 +1,10 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.4.0'
+    id 'org.jetbrains.intellij' version '1.7.0'
     id 'java'
 }
 
 group 'me.oddlyoko'
-version '0.0.2'
+version '0.0.3'
 
 repositories {
     mavenCentral()
@@ -17,7 +17,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version = '2021.3.2'
+    version = '2022.1.4'
     type = 'PC'
     plugins = [
             "PythonCore"
