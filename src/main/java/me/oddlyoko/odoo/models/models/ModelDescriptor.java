@@ -9,8 +9,6 @@ import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyUtil;
 import me.oddlyoko.odoo.OdooUtil;
 import me.oddlyoko.odoo.models.OdooModelUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,46 +19,9 @@ import java.util.Objects;
 /**
  * A description of a model
  */
-public final class ModelDescriptor {
+public record ModelDescriptor(PyClass pyClass, String odooModel, String description, List<String> inherit,
+                              Map<String, String> inherits) {
     public static final String MODEL_DESCRIPTOR_KEY = "model.descriptor";
-
-    private final PyClass pyClass;
-    private final String odooModel;
-    private final String description;
-    private final List<String> inherit;
-    private final Map<String, String> inherits;
-
-    public ModelDescriptor(@NotNull PyClass pyClass,
-                           @NotNull String odooModel,
-                           @Nullable String description,
-                           @NotNull List<String> inherit,
-                           @NotNull Map<String, String> inherits) {
-        this.pyClass = pyClass;
-        this.odooModel = odooModel;
-        this.description = description;
-        this.inherit = List.copyOf(inherit);
-        this.inherits = Map.copyOf(inherits);
-    }
-
-    public PyClass getPyClass() {
-        return pyClass;
-    }
-
-    public String getOdooModel() {
-        return odooModel;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public List<String> getInherit() {
-        return inherit;
-    }
-
-    public Map<String, String> getInherits() {
-        return inherits;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -74,11 +35,6 @@ public final class ModelDescriptor {
                 && Objects.equals(description, that.description)
                 && inherit.equals(that.inherit)
                 && inherits.equals(that.inherits);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(pyClass, odooModel, description, inherit, inherits);
     }
 
     @Override
@@ -115,22 +71,22 @@ public final class ModelDescriptor {
         PyTargetExpression pyNameExpression = pyClass.findClassAttribute(OdooModelUtil.NAME_KEY, false, null);
         if (pyNameExpression != null) {
             PyExpression valueExpression = pyNameExpression.findAssignedValue();
-            if (valueExpression instanceof PyStringLiteralExpression)
-                odooModel = ((PyStringLiteralExpression) valueExpression).getStringValue();
+            if (valueExpression instanceof PyStringLiteralExpression stringExpression)
+                odooModel = stringExpression.getStringValue();
         }
         // _description
         PyTargetExpression pyDescriptionExpression = pyClass.findClassAttribute(OdooModelUtil.DESCRIPTION_KEY, false, null);
         if (pyDescriptionExpression != null) {
             PyExpression valueExpression = pyDescriptionExpression.findAssignedValue();
-            if (valueExpression instanceof PyStringLiteralExpression)
-                description = ((PyStringLiteralExpression) valueExpression).getStringValue();
+            if (valueExpression instanceof PyStringLiteralExpression stringExpression)
+                description = stringExpression.getStringValue();
         }
         // _inherit
         PyTargetExpression pyInheritExpression = pyClass.findClassAttribute(OdooModelUtil.INHERIT_KEY, false, null);
         if (pyInheritExpression != null) {
             PyExpression valueExpression = pyInheritExpression.findAssignedValue();
-            if (valueExpression instanceof PyStringLiteralExpression) {
-                String value = ((PyStringLiteralExpression) valueExpression).getStringValue();
+            if (valueExpression instanceof PyStringLiteralExpression stringExpression) {
+                String value = stringExpression.getStringValue();
                 inherit.add(value);
             } else {
                 List<String> lst = PyUtil.strListValue(valueExpression);
@@ -146,11 +102,11 @@ public final class ModelDescriptor {
         PyTargetExpression pyInheritsExpression = pyClass.findClassAttribute(OdooModelUtil.INHERITS_KEY, false, null);
         if (pyInheritsExpression != null) {
             PyExpression valueExpression = pyInheritsExpression.findAssignedValue();
-            if (valueExpression instanceof PyDictLiteralExpression) {
-                Map<String, PyExpression> value = PyUtil.dictValue((PyDictLiteralExpression) valueExpression);
+            if (valueExpression instanceof PyDictLiteralExpression dictExpression) {
+                Map<String, PyExpression> value = PyUtil.dictValue(dictExpression);
                 for (Map.Entry<String, PyExpression> entry : value.entrySet())
-                    if (entry.getValue() instanceof PyStringLiteralExpression)
-                        inherits.put(entry.getKey(), ((PyStringLiteralExpression) entry.getValue()).getStringValue());
+                    if (entry.getValue() instanceof PyStringLiteralExpression stringExpression)
+                        inherits.put(entry.getKey(), stringExpression.getStringValue());
             }
         }
         return new ModelDescriptor(pyClass, odooModel, description, inherit, inherits);

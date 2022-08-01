@@ -48,7 +48,7 @@ public class OdooModuleDependencyIndex extends ScalarIndexExtension<String> {
             ModuleDescriptor descriptor = ModuleDescriptor.parseFile(file);
             if (descriptor == null)
                 return result;
-            descriptor.getDepends().forEach(s -> result.put(s, null));
+            descriptor.depends().forEach(s -> result.put(s, null));
             return result;
         };
     }

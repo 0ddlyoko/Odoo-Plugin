@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class OdooModuleUtil {
     public static final List<String> MANIFEST_FILES = List.of(
@@ -101,7 +100,7 @@ public final class OdooModuleUtil {
         return odooModule.getModuleDepends()
                 .stream()
                 .map(s -> getModule(s, odooModule.getProject()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static OdooModule getModuleFromDirectory(@NotNull PsiDirectory psiDirectory) {
@@ -134,14 +133,14 @@ public final class OdooModuleUtil {
     }
 
     public static OdooModule getModule(@NotNull PsiElement element) {
-        if (element instanceof PsiFile)
-            return getModuleFromFile((PsiFile) element);
-        if (element instanceof PsiDirectory)
-            return getModuleFromDirectory((PsiDirectory) element);
-        if (element instanceof PomTargetPsiElement) {
-            PomTarget target = ((PomTargetPsiElement) element).getTarget();
-            if (target instanceof PsiTarget)
-                return getModule(((PsiTarget) target).getNavigationElement());
+        if (element instanceof PsiFile psiFile)
+            return getModuleFromFile(psiFile);
+        if (element instanceof PsiDirectory psiDirectory)
+            return getModuleFromDirectory(psiDirectory);
+        if (element instanceof PomTargetPsiElement targetElement) {
+            PomTarget target = targetElement.getTarget();
+            if (target instanceof PsiTarget psiTarget)
+                return getModule(psiTarget.getNavigationElement());
         }
         return getModuleFromFile(element.getContainingFile().getOriginalFile());
     }

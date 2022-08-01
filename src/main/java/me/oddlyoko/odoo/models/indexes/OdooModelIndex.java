@@ -61,7 +61,7 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
                     ModelDescriptor descriptor = ModelDescriptor.fromPyClass(node);
                     if (descriptor == null)
                         return;
-                    result.put(descriptor.getOdooModel(), null);
+                    result.put(descriptor.odooModel(), null);
                 }
             });
             return result;
@@ -122,7 +122,7 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
                 public void visitPyClass(@NotNull PyClass node) {
                     super.visitPyClass(node);
                     ModelDescriptor descriptor = ModelDescriptor.fromPyClass(node);
-                    if (descriptor != null && odooModel.equals(descriptor.getOdooModel()))
+                    if (descriptor != null && odooModel.equals(descriptor.odooModel()))
                         result.add(node);
                 }
             });

@@ -31,10 +31,10 @@ public class OdooManifestReferenceListCondition extends PatternCondition<PyStrin
         PsiElement parent = pyString.getParent();
         if (parent instanceof PyListLiteralExpression) {
             parent = parent.getParent();
-            if (parent instanceof PyKeyValueExpression) {
-                PyExpression key = ((PyKeyValueExpression) parent).getKey();
-                if (key instanceof PyStringLiteralExpression)
-                    return acceptedKeys.contains(((PyStringLiteralExpression) key).getStringValue());
+            if (parent instanceof PyKeyValueExpression parentExpression) {
+                PyExpression key = parentExpression.getKey();
+                if (key instanceof PyStringLiteralExpression keyExpression)
+                    return acceptedKeys.contains(keyExpression.getStringValue());
             }
         }
         return false;

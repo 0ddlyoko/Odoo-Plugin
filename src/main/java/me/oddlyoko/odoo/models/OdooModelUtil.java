@@ -77,7 +77,7 @@ public final class OdooModelUtil {
         ModelDescriptor modelDescriptor = odooPyClass.getModelDescriptor();
         if (modelDescriptor == null)
             return null;
-        return modelDescriptor.getOdooModel();
+        return modelDescriptor.odooModel();
     }
 
     /**
@@ -89,9 +89,9 @@ public final class OdooModelUtil {
      */
     public static List<PyClass> getClasses(@NotNull VirtualFile file, @NotNull Project project) {
         PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-        if (!(psiFile instanceof PyFile))
+        if (!(psiFile instanceof PyFile pyFile))
             return List.of();
-        return ((PyFile) psiFile).getTopLevelClasses();
+        return pyFile.getTopLevelClasses();
     }
 
     /**
