@@ -1,6 +1,5 @@
 package me.oddlyoko.odoo.models.reference;
 
-import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
@@ -12,8 +11,6 @@ import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import me.oddlyoko.odoo.modules.models.OdooModule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class OdooModelReference extends PsiReferenceBase.Poly<PsiElement> {
@@ -35,15 +32,12 @@ public class OdooModelReference extends PsiReferenceBase.Poly<PsiElement> {
     @NotNull
     @Override
     public Object[] getVariants() {
-        List<LookupElement> elements = new ArrayList<>();
         PsiElement element = getElement();
         OdooModule odooModule = OdooModuleUtil.getModule(element);
         if (odooModule == null)
             return new Object[0];
 
-        OdooModelUtil.getAllModels(element.getProject(), odooModule).forEach(s ->
-                elements.add(LookupElementBuilder.create(s)));
-        Collections.reverse(elements);
-        return elements.toArray();
+        return OdooModelUtil.getAllModels(element.getProject(), odooModule).stream()
+                .map(LookupElementBuilder::create).toArray();
     }
 }

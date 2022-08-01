@@ -13,7 +13,7 @@
         <li>
             Version alpha 0.0.3
             <ul>
-                <li>Add autocompletion with inherit</li>
+                <li>Add autocompletion with _name, _inherit and _inherits</li>
             </ul>
         </li>
         <li>
