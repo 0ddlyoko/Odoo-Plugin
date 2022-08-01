@@ -19,105 +19,10 @@ import java.util.Map;
  * A description of a module.<br />
  * Data is taken from manifest file
  */
-public final class ModuleDescriptor {
-    private final PsiDirectory directory;
-    private final PsiFile manifest;
-    private final String id;
-    private final String name;
-    private final String version;
-    private final String description;
-    private final List<String> author;
-    private final String website;
-    private final List<String> depends;
-    private final List<String> data;
-    private final List<String> demo;
-    private final String license;
+public record ModuleDescriptor(PsiDirectory directory, PsiFile manifest, String id, String name, String version,
+                               String description, List<String> author, String website, List<String> depends,
+                               List<String> data, List<String> demo, String license) {
 
-    public ModuleDescriptor(@NotNull PsiDirectory directory,
-                            @NotNull PsiFile manifest,
-                            @NotNull String id,
-                            @NotNull String name,
-                            @NotNull String version,
-                            @NotNull String description,
-                            @NotNull List<String> author,
-                            @NotNull String website,
-                            @NotNull List<String> depends,
-                            @NotNull List<String> data,
-                            @NotNull List<String> demo,
-                            @NotNull String license) {
-        this.directory = directory;
-        this.manifest = manifest;
-        this.id = id;
-        this.name = name;
-        this.version = version;
-        this.description = description;
-        this.author = author;
-        this.website = website;
-        this.depends = depends;
-        this.data = data;
-        this.demo = demo;
-        this.license = license;
-    }
-
-    @NotNull
-    public PsiDirectory getDirectory() {
-        return directory;
-    }
-
-    @NotNull
-    public PsiFile getManifest() {
-        return manifest;
-    }
-
-    @NotNull
-    public String getId() {
-        return id;
-    }
-
-    @NotNull
-    public String getName() {
-        return name;
-    }
-
-    @NotNull
-    public String getVersion() {
-        return version;
-    }
-
-    @NotNull
-    public String getDescription() {
-        return description;
-    }
-
-    @NotNull
-    public List<String> getAuthor() {
-        return author;
-    }
-
-    @NotNull
-    public String getWebsite() {
-        return website;
-    }
-
-    @NotNull
-    public List<String> getDepends() {
-        return depends;
-    }
-
-    @NotNull
-    public List<String> getData() {
-        return data;
-    }
-
-    @NotNull
-    public List<String> getDemo() {
-        return demo;
-    }
-
-    @NotNull
-    public String getLicense() {
-        return license;
-    }
 
     @Override
     public String toString() {
@@ -146,44 +51,44 @@ public final class ModuleDescriptor {
             String key = entry.getKey();
             PyExpression value = entry.getValue();
             switch (key) {
-                case "name":
-                    if (value instanceof PyStringLiteralExpression)
-                        name = ((PyStringLiteralExpression) value).getStringValue();
-                    break;
-                case "version":
-                    if (value instanceof PyStringLiteralExpression)
-                        version = ((PyStringLiteralExpression) value).getStringValue();
-                    break;
-                case "description":
-                    if (value instanceof PyStringLiteralExpression)
-                        description = ((PyStringLiteralExpression) value).getStringValue();
-                    break;
-                case "author":
-                    if (value instanceof PyStringLiteralExpression)
-                        authors = List.of(((PyStringLiteralExpression) value).getStringValue());
-                    else if (value instanceof PySequenceExpression)
-                        authors = sequenceToList((PySequenceExpression) value);
-                    break;
-                case "website":
-                    if (value instanceof PyStringLiteralExpression)
-                        website = ((PyStringLiteralExpression) value).getStringValue();
-                    break;
-                case "depends":
-                    if (value instanceof PySequenceExpression)
-                        depends = sequenceToList((PySequenceExpression) value);
-                    break;
-                case "data":
-                    if (value instanceof PySequenceExpression)
-                        data = sequenceToList((PySequenceExpression) value);
-                    break;
-                case "demo":
-                    if (value instanceof PySequenceExpression)
-                        demo = sequenceToList((PySequenceExpression) value);
-                    break;
-                case "license":
-                    if (value instanceof PyStringLiteralExpression)
-                        license = ((PyStringLiteralExpression) value).getStringValue();
-                    break;
+                case "name" -> {
+                    if (value instanceof PyStringLiteralExpression stringExpression)
+                        name = stringExpression.getStringValue();
+                }
+                case "version" -> {
+                    if (value instanceof PyStringLiteralExpression stringExpression)
+                        version = stringExpression.getStringValue();
+                }
+                case "description" -> {
+                    if (value instanceof PyStringLiteralExpression stringExpression)
+                        description = stringExpression.getStringValue();
+                }
+                case "author" -> {
+                    if (value instanceof PyStringLiteralExpression stringExpression)
+                        authors = List.of(stringExpression.getStringValue());
+                    else if (value instanceof PySequenceExpression sequenceExpression)
+                        authors = sequenceToList(sequenceExpression);
+                }
+                case "website" -> {
+                    if (value instanceof PyStringLiteralExpression stringExpression)
+                        website = stringExpression.getStringValue();
+                }
+                case "depends" -> {
+                    if (value instanceof PySequenceExpression sequenceExpression)
+                        depends = sequenceToList(sequenceExpression);
+                }
+                case "data" -> {
+                    if (value instanceof PySequenceExpression sequenceExpression)
+                        data = sequenceToList(sequenceExpression);
+                }
+                case "demo" -> {
+                    if (value instanceof PySequenceExpression sequenceExpression)
+                        demo = sequenceToList(sequenceExpression);
+                }
+                case "license" -> {
+                    if (value instanceof PyStringLiteralExpression stringExpression)
+                        license = stringExpression.getStringValue();
+                }
             }
         }
         return new ModuleDescriptor(module,

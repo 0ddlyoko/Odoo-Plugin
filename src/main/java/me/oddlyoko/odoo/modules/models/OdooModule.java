@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -75,11 +74,11 @@ public final class OdooModule {
                 result.addAll(module.getModuleDepends());
             }
         }
-        return result.stream().distinct().collect(Collectors.toUnmodifiableList());
+        return result.stream().distinct().toList();
     }
 
     public List<OdooModule> getOdooModuleDepends() {
-        return getModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())).collect(Collectors.toList());
+        return getModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())).toList();
     }
 
     /**
@@ -95,7 +94,7 @@ public final class OdooModule {
         if (includeThisOne)
             stream = Stream.concat(Stream.of(this), stream);
 
-        return stream.filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        return stream.filter(Objects::nonNull).distinct().toList();
     }
 
     /**
@@ -108,7 +107,7 @@ public final class OdooModule {
     }
 
     public List<OdooModule> getDirectOdooModuleDepends() {
-        return getDirectModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())).collect(Collectors.toList());
+        return getDirectModuleDepends().stream().map(s -> OdooModuleUtil.getModule(s, getProject())).toList();
     }
 
     public List<OdooModule> getOdooModuleDepending() {
@@ -141,7 +140,7 @@ public final class OdooModule {
 
         return getOdooModuleDepends(true).stream()
                 .flatMap(odooModule -> odooModule.getVirtualFiles(false).stream())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -152,7 +151,7 @@ public final class OdooModule {
     public List<VirtualFile> getPythonFiles(boolean includeDepends) {
         return getVirtualFiles(includeDepends).stream()
                 .filter(file -> file.getFileType() == PythonFileType.INSTANCE)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<String> getModels(boolean includeDepends) {

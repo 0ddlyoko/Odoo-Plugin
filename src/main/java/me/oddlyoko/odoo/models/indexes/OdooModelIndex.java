@@ -3,6 +3,7 @@ package me.oddlyoko.odoo.models.indexes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileBasedIndex;
@@ -16,16 +17,15 @@ import com.jetbrains.python.psi.PyElementVisitor;
 import me.oddlyoko.odoo.models.OdooModelFilter;
 import me.oddlyoko.odoo.models.OdooModelUtil;
 import me.oddlyoko.odoo.models.models.ModelDescriptor;
-import me.oddlyoko.odoo.models.models.OdooModel;
 import me.oddlyoko.odoo.modules.OdooModuleUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Index containing all odoo modules
@@ -61,7 +61,7 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
                     ModelDescriptor descriptor = ModelDescriptor.fromPyClass(node);
                     if (descriptor == null)
                         return;
-                    result.put(descriptor.getOdooModel(), null);
+                    result.put(descriptor.odooModel(), null);
                 }
             });
             return result;
@@ -91,21 +91,43 @@ public class OdooModelIndex extends ScalarIndexExtension<String> {
     }
 
     /**
-     * Retrieves all {@link OdooModel} instance from given id for given {@link Project}
+     * Retrieves all {@link PyClass} instance from given id for given {@link Project}
      *
      * @param odooModel The id of the model
      * @param project   The project
-     * @return A {@link Set} containing all {@link OdooModel} instance of given id for given {@link Project}
+     * @return A {@link List} containing all {@link PyClass} instance of given id for given {@link Project}
      */
-    public static Set<OdooModel> getOdooModels(@NotNull String odooModel, @NotNull Project project) {
-        GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
-        Collection<VirtualFile> files = FileBasedIndex.getInstance().getContainingFiles(NAME, odooModel, scope);
-        return files
-                .stream()
-                .flatMap(file -> OdooModelUtil.getModels(file, project)
-                        .stream()
-                        .filter(odooModel1 -> odooModel1 != null && odooModel.equals(odooModel1.getOdooModel())))
-                .collect(Collectors.toUnmodifiableSet());
+    public static List<PyClass> getModelsByName(@NotNull String odooModel, @NotNull Project project) {
+        return getModelsByName(odooModel, project, GlobalSearchScope.projectScope(project));
+    }
+
+    /**
+     * Retrieves all {@link PyClass} instance from given id for given {@link Project} and scope
+     *
+     * @param odooModel The id of the project
+     * @param project   The project
+     * @param scope     The scope
+     * @return A {@link List} containing all {@link PyClass} instance of given id for given {@link Project}
+     */
+    public static List<PyClass> getModelsByName(@NotNull String odooModel, @NotNull Project project, GlobalSearchScope scope) {
+        Collection<VirtualFile> vFiles = FileBasedIndex.getInstance().getContainingFiles(NAME, odooModel, scope);
+        List<PyClass> result = new ArrayList<>();
+        PsiManager psiManager = PsiManager.getInstance(project);
+        vFiles.forEach(vFile -> {
+            PsiFile file = psiManager.findFile(vFile);
+            if (file == null)
+                return;
+            file.acceptChildren(new PyElementVisitor() {
+                @Override
+                public void visitPyClass(@NotNull PyClass node) {
+                    super.visitPyClass(node);
+                    ModelDescriptor descriptor = ModelDescriptor.fromPyClass(node);
+                    if (descriptor != null && odooModel.equals(descriptor.odooModel()))
+                        result.add(node);
+                }
+            });
+        });
+        return result;
     }
 
     /**

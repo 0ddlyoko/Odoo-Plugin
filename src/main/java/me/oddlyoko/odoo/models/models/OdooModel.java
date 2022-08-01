@@ -19,7 +19,7 @@ public class OdooModel extends PyClassImpl {
 
     public String getOdooModel() {
         ModelDescriptor descriptor = getModelDescriptor();
-        return descriptor != null ? descriptor.getOdooModel() : null;
+        return descriptor != null ? descriptor.odooModel() : null;
     }
 
     public ModelDescriptor getModelDescriptor() {
