@@ -4,8 +4,27 @@
     <vendor email="nathangiaco@hotmail.com" url="https://0ddlyoko.be">Giacomello Nathan</vendor>
 
     <description><![CDATA[
-    Provides support for <a href="https://www.odoo.com">Odoo</a>.
-    Use this plugin to fastly create odoo module
+    <h1>Odoo Integration for PyCharm</h1>
+    <p>
+        Provides support for <a href="https://www.odoo.com">Odoo</a>.<br />
+        Use this plugin to fastly create odoo module
+    </p>
+    <p>
+        <h2>Features</h2>
+        <ul>
+            <li>Understand Odoo module</li>
+            <li>Code completion for manifest file, python models</li>
+        </ul>
+    </p>
+    <p>
+        It's recommended to add odoo and odoo-enterprise in your Project Structure:
+        <ol>
+            <li>File => Settings...</li>
+            <li>Project: ProjectName => Project Structure</li>
+            <li>+ Add Content Root</li>
+            <li>Add Odoo and odoo enterprise as Content Root Directories</li>
+        </ol>
+    </p>
     ]]></description>
 
     <change-notes><![CDATA[
