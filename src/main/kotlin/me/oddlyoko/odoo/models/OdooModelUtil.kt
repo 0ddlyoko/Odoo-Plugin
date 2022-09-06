@@ -17,7 +17,7 @@ object OdooModelUtil {
     val INHERIT_KEY = "_inherit"
     val INHERITS_KEY = "_inherits"
 
-    fun isInvalidOdooPyClass(pyClass: PyClass): Boolean = getOdooPyClass(pyClass)?.isInvalidOdooClass() ?: false
+    fun isInvalidOdooPyClass(pyClass: PyClass): Boolean = getOdooPyClass(pyClass) == null
 
     fun getOdooPyClass(pyClass: PyClass): OdooModel? {
         if (pyClass is OdooModel)

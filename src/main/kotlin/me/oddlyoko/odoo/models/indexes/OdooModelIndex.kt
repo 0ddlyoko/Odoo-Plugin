@@ -75,7 +75,5 @@ class OdooModelIndex: ScalarIndexExtension<String>() {
             allModels.forEach { index.processValues(NAME, it, null, { _, _ -> result.add(it) }, scope) }
             return result
         }
-
-        fun getAllStringModels(project: Project): List<String> = FileBasedIndex.getInstance().getAllKeys(NAME, project).toList()
     }
 }
