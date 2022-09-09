@@ -58,11 +58,6 @@ object OdooModuleUtil {
 
     fun getAllModules(project: Project): List<OdooModule> = OdooModuleIndex.getAllOdooModules(project)
 
-    /**
-     * Get available OdooModule from given OdooModule
-     */
-    fun getAvailableModules(odooModule: OdooModule): List<OdooModule> = odooModule.getOdooModuleDepends()
-
     fun getModuleFromDirectory(directory: PsiDirectory): OdooModule? =
         getModule(directory.virtualFile, directory.project)
 

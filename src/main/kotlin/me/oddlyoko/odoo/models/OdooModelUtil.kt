@@ -27,7 +27,7 @@ object OdooModelUtil {
 
     fun getDescriptor(pyClass: PyClass): ModelDescriptor? = ModelDescriptor.fromPyClass(pyClass)
 
-    fun getModelName(pyClass: PyClass): String? = getOdooPyClass(pyClass)?.getModelDescriptor()?.odooModel
+    fun getModelName(pyClass: PyClass): String? = getOdooPyClass(pyClass)?.modelDescriptor?.odooModel
 
     fun getClasses(vFile: VirtualFile, project: Project): List<PyClass> {
         val file = PsiManager.getInstance(project).findFile(vFile) ?: return listOf()
@@ -53,4 +53,7 @@ object OdooModelUtil {
 
     fun getClassesByModelName(odooModel: String, project: Project, odooModule: OdooModule): List<PyClass> =
         OdooModelIndex.getClassesByModelName(odooModel, project, odooModule.getOdooPythonModuleScope(true))
+
+    fun getDependingClassesByModelName(odooModel: String, project: Project, odooModule: OdooModule): List<PyClass> =
+        OdooModelIndex.getClassesByModelName(odooModel, project, odooModule.getOdooDependingPythonModuleScope())
 }
