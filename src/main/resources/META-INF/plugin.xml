@@ -80,6 +80,8 @@
         <importResolver implementation="me.oddlyoko.odoo.modules.OdooModuleResolver" />
         <pyModuleMembersProvider implementation="me.oddlyoko.odoo.modules.OdooModuleAddonsMembersProvider" />
         <inspectionExtension implementation="me.oddlyoko.odoo.highlighting.OdooPyInspectionExtension" />
+        <pySuperMethodsSearch implementation="me.oddlyoko.odoo.models.OdooPySuperMethodsSearch" order="first" />
+        <pyClassInheritorsSearch implementation="me.oddlyoko.odoo.models.OdooPyClassInheritorsSearch" order="first" />
     </extensions>
 
 <!--    <actions>-->

@@ -41,30 +41,70 @@ data class OdooModule(val directory: PsiDirectory, val manifest: PsiFile) {
         return result.distinct()
     }
 
+    /**
+     * Retrieves Odoo modules that this module depends on
+     */
     fun getOdooModuleDepends(): List<OdooModule> = getModuleDepends().mapNotNull { OdooModuleUtil.getModule(it, project) }
 
     /**
-     * Retrieves modules that depends on this OdooModule
+     * Retrieves Odoo modules that this module depends on
      */
     fun getOdooModuleDepends(includeThisOne: Boolean): List<OdooModule> {
         val result = arrayListOf<OdooModule>()
-        result.addAll(getModuleDepends().mapNotNull { OdooModuleUtil.getModule(it, project) })
+        result.addAll(getOdooModuleDepends())
         if (includeThisOne)
             result.add(this)
         return result.distinct()
     }
 
     /**
-     * Retrieves direct module dependencies of this OdooModule
+     * Retrieves modules that depend on this module
+     */
+    fun getModuleDependings(): List<String> = getOdooModuleDependings().map { it.name }
+
+    /**
+     * Retrieves Odoo modules that dpeend on this module
+     */
+    fun getOdooModuleDependings(): List<OdooModule> {
+        val result = arrayListOf<OdooModule>()
+        getDirectOdooModuleDepending().forEach {
+            result.add(it)
+            result.addAll(it.getOdooModuleDependings())
+        }
+        return result.distinct()
+    }
+
+    /**
+     * Retrieves Odoo modules that dpeend on this module
+     */
+    fun getOdooModuleDependings(includeThisOne: Boolean): List<OdooModule> {
+        val result = arrayListOf<OdooModule>()
+        result.addAll(getOdooModuleDependings())
+        if (includeThisOne)
+            result.add(this)
+        return result.distinct()
+    }
+
+    /**
+     * Retrieves direct modules that this OdooModule depends on
      */
     fun getDirectModuleDepends(): List<String> = OdooModuleDependencyIndex.getDepends(virtualFile, project)
 
+
+    /**
+     * Retrieves direct Odoo module that this OdooModule depends on
+     */
     fun getDirectOdooModuleDepends(): List<OdooModule> = getDirectModuleDepends().mapNotNull { OdooModuleUtil.getModule(it, project) }
 
     /**
-     * Retrieves direct modules that depends of this OdooModule
+     * Retrieves direct modules that depends on this OdooModule
      */
-    fun getOdooModuleDepending(): List<OdooModule> = OdooModuleDependencyIndex.getOdooDepending(name, project)
+    fun getDirectModuleDepending(): List<String> = getDirectOdooModuleDepending().map { it.name }
+
+    /**
+     * Retrieves direct Odoo modules that depends on this OdooModule
+     */
+    fun getDirectOdooModuleDepending(): List<OdooModule> = OdooModuleDependencyIndex.getOdooDepending(name, project)
 
     /**
      * Check if this OdooModule can see given module<br />
@@ -87,6 +127,12 @@ data class OdooModule(val directory: PsiDirectory, val manifest: PsiFile) {
     fun getPythonFiles(includeDepends: Boolean): List<VirtualFile> =
         getVirtualFiles(includeDepends).filter { it.fileType == PythonFileType.INSTANCE }
 
+    fun getDependingVirtualFiles(): List<VirtualFile> =
+        getOdooModuleDependings().flatMap { it.getVirtualFiles(false) }
+
+    fun getDependingPythonFiles(): List<VirtualFile> =
+        getDependingVirtualFiles().filter { it.fileType == PythonFileType.INSTANCE }
+
     fun getModels(includeDepends: Boolean): List<String> =
         OdooModelIndex.getAllModels(project, getOdooPythonModuleScope(includeDepends))
 
@@ -95,6 +141,12 @@ data class OdooModule(val directory: PsiDirectory, val manifest: PsiFile) {
 
     fun getOdooPythonModuleScope(includeDepends: Boolean): GlobalSearchScope =
         GlobalSearchScope.filesWithLibrariesScope(project, getPythonFiles(includeDepends))
+
+    fun getOdooDependingModuleScope(): GlobalSearchScope =
+        GlobalSearchScope.filesWithLibrariesScope(project, getDependingVirtualFiles())
+
+    fun getOdooDependingPythonModuleScope(): GlobalSearchScope =
+        GlobalSearchScope.filesWithLibrariesScope(project, getDependingPythonFiles())
 
     fun getOdooManifestModificationTracker(): ModificationTracker = OdooManifestModificationTracker[name]
 
